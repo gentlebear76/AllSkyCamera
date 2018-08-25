@@ -1,6 +1,8 @@
-import laazotea.indi.client;
+package stardancer.observatory.allsky;
 
-public class AllSky {
+import org.indilib.i4j.*;
+
+public class AllSkyCamera {
 
 
 

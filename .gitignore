@@ -108,3 +108,13 @@ Temporary Items
 # Custom
 .idea/
 libs/
+code.style.schemes.xml
+colors.scheme.xml
+debugger.renderers.xml
+debugger.xml
+editor.xml
+ide.general.xml
+markdown.xml
+vcs.xml
+_windows/
+codestyles/

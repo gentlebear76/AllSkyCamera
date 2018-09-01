@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import org.indilib.i4j.Constants;
 import org.indilib.i4j.client.*;
+import org.indilib.i4j.properties.INDIStandardProperty;
 import org.indilib.i4j.protocol.url.INDIURLStreamHandlerFactory;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 
-public class IndiClient implements INDIServerConnectionListener, INDIDeviceListener, INDIPropertyListener {
+public class IndiClient implements INDIServerConnectionListener, INDIDeviceListener, INDIPropertyListener, INDIElementListener {
 
     private static final Logger LOGGER = Logger.getLogger(IndiClient.class);
 
@@ -22,60 +23,44 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
 
     HashMap<String,Device> devices;
     boolean change;
+    boolean pictureArrived = false;
+    INDIPropertyListener externalePropertyListener;
+    INDIProperty imageProperty;
+    INDIBLOBElement picture;
+
 
 
     private INDIServerConnection indiServerConnection;
 
 
-    public IndiClient(String host, int port) {
+    public IndiClient(String host, int port, INDIPropertyListener propertyListener) {
         indiServerConnection = new INDIServerConnection(host, port);
-
         devices = new HashMap<>();
-
         change = false;
-
         indiServerConnection.addINDIServerConnectionListener(this);
-
-
+//        imageProperty.addINDIPropertyListener(externalePropertyListener);
+        this.externalePropertyListener = propertyListener;
 
         try {
             indiServerConnection.connect();
             indiServerConnection.askForDevices();
-//            INDIDevice camera = indiServerConnection.getDevice("ZWO CCD");
-//
-//            List<INDIProperty<?>> tese = camera.getAllProperties();
-//
-//
-//            List<INDIDevice> hasd = indiServerConnection.getDevicesAsList();
-//
-//            String hasadsf = "";
         } catch (IOException i) {
             LOGGER.error("Cannot connect to INDI server - " + i.getMessage());
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
-
-//
-//    public String test() {
-//        INDIProperty property = indiServerConnection.getProperty("ZWO CCD ASI178MM", "DRIVER_INFO");
-//        return property.getNameStateAndValuesAsString();
-//    }
-
-
-
-//
-//
-//    public List<INDIDevice> getAllDevices() {
-//
-//
-////        String[] asdasd = indiServerConnection.getDeviceNames();
-//
-//
-//        INDIDevice test = indiServerConnection.getDevice("ZWO CCD ASI178MM");
-//
-//
-//
-//        return indiServerConnection.getDevicesAsList();
-//    }
 
     @Override
     public void newDevice(INDIServerConnection connection, INDIDevice device) {
@@ -116,6 +101,9 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
         devices.get(device.getName()).addProperty(property);
         change = true;
         property.addINDIPropertyListener(this);
+        if (property.getName().equals("CCD1")) {
+            property.addINDIPropertyListener(externalePropertyListener);
+        }
     }
 
     @Override
@@ -133,21 +121,58 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
 
     @Override
     public void propertyChanged(INDIProperty<?> property) {
+        imageProperty = property;
         LOGGER.info("Property changed: " + property.getNameStateAndValuesAsString());
+
+
         String device_name = property.getDevice().getName();
         devices.get(device_name).updateProperty(property);
+
+        if (property.getName().equals("CCD1")) {
+
+            picture = (INDIBLOBElement) property.getElement("CCD1");
+            pictureArrived = true;
+
+        }
         change = true;
     }
 
-    public HashMap<String,Device> getDevices(){
+    @Override
+    public void elementChanged(INDIElement element) {
+//        element.addINDIElementListener();
+        LOGGER.info("Element changed: " + element.getName());
+
+//        newElementArrived = true;
+        change = true;
+
+//        INDIBLOBElement be = (INDIBLOBElement) picture;
+//        INDIBLOBValue v = be.getValue();
+//
+//        if (v != null) {
+//            String fileName = "ddd" + new Date() + v.getFormat();
+//
+//            File f = new File(fileName);
+//
+//            try {
+//                LOGGER.info("Saving " + f);
+//                be.getValue().saveBLOBData(f); // Saves the data to file
+//            } catch (IOException e) {
+//                LOGGER.error("could not save " + f, e);
+//            }
+//        }
+//
+//
+    }
+
+    public HashMap<String,Device> getDevices() {
         return devices;
     }
 
-    public Device getDevice(String device_name){
+    public Device getDevice(String device_name) {
         return devices.get(device_name);
     }
 
-    public ArrayList<String> getDevicesNames(){
+    public ArrayList<String> getDevicesNames() {
         ArrayList<String> names=new ArrayList<>();
 
         for (String name : devices.keySet()) {
@@ -156,21 +181,41 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
         return names;
     }
 
-    public boolean has_change(){
+    public INDIElement getPicture() {
+        pictureArrived = false;
+        return this.picture;
+    }
+
+    public boolean hasNewPicture() {
+        return pictureArrived;
+    }
+
+    public boolean hasChange() {
         return change;
     }
 
-    public void changeRead(){
-        change=false;
+    public void resetChanged() {
+        change = false;
     }
 
-    public String getNameConecction(){
+    public String getNameConecction() {
         return indiServerConnection.getURL().getHost();
     }
 
+    public void listenToDevice(Device device) {
+        indiServerConnection.addINDIDeviceListener(device.getName(), this);
+    }
+
+    public void stopListeningToDevice(Device device) {
+        indiServerConnection.removeINDIDeviceListener(device.getName(), this);
+    }
 
 
-
+    public INDIProperty getPropertyForDevice(Device device, String propertyName){
+        INDIDevice someDevice =  indiServerConnection.getDevice(device.getName());
+        INDIProperty<?> indiProperty = someDevice.getProperty(propertyName);
+        return indiProperty;
+    }
 
 
 }

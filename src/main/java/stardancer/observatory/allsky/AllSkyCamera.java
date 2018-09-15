@@ -4,11 +4,8 @@ package stardancer.observatory.allsky;
 import org.apache.commons.cli.CommandLine;
 import org.apache.log4j.Logger;
 import org.indilib.i4j.Constants;
-import org.indilib.i4j.client.*;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 public class AllSkyCamera {
 
@@ -21,6 +18,8 @@ public class AllSkyCamera {
 
     Device device;
     CameraHandler cameraHandler;
+    boolean keepRunning = false;
+    double exposureTime = 0.5;
 
     private void connectToServer() {
         indiClient = new IndiClient(host, Integer.parseInt(port), cameraHandler);
@@ -40,33 +39,38 @@ public class AllSkyCamera {
 
 
     private void start() {
-        cameraHandler = new CameraHandler();
+        cameraHandler = new CameraHandler("c:\\temp");
         connectToServer();
 
         try {
             cameraHandler.connectToCamera(indiClient);
+            Thread.sleep(1000); //We wait for a second to make sure, the server is ready with the camera.
 
-//            while (true) {
-                cameraHandler.setCCDExposure(0.1);
+            keepRunning = true;
+
+            takePictures(exposureTime);
+
+        } catch (IOException i) {
+            LOGGER.error("Got an error when trying to connect to the camera! " + i.getMessage());
+        } catch (InterruptedException i) {
+            LOGGER.info("Someone called?? I was taking a nap.");
+        }
+    }
+
+    private void takePictures(double exposureTime) {
+        while (keepRunning) {
+            try {
+                Thread.sleep(1000);
+                cameraHandler.setCCDExposure(exposureTime);
 
                 while (!indiClient.pictureArrived) {
                     Thread.sleep(500);
                 }
-
-//                cameraHandler.getImage((INDIBLOBElement)indiClient.getPicture());
-                String aewdasd = "";
-//            }
-//            INDIProperty property = indiClient.getPropertyForDevice(device, "CCD_EXPOSURE");
-//            String hest = "";
-        } catch (IOException i) {
-            LOGGER.error("Got an error when trying to connect to the camera! " + i.getMessage());
-        } catch (InterruptedException i) {
-
+            } catch (InterruptedException i) {
+                LOGGER.info("Sleep interrupted for some reason... No worries, I'll get up now.");
+            }
         }
     }
-
-
-
 
     public static void main(String[] args) throws Exception {
 
@@ -80,40 +84,6 @@ public class AllSkyCamera {
         AllSkyCamera allSkyCamera = new AllSkyCamera();
 
         allSkyCamera.start();
-//
-//        Map<String, Device> test = indiClient.getDevices();
-//
-//        List<String> deviceNames = indiClient.getDevicesNames();
-
-//        String hest  = "";
-
-
-//                INDIProperty cameraConnectedProperty = device.getAllProperties().get(0);
-//                device.updateProperty(cameraConnectedProperty);
-
-//                indiClient.listenToDevice(device);
-
-//                INDIProperty property = indiClient.getPropertyForDevice(device);
-//
-//                Iterator<INDIElement> elementIterator = property.iterator();
-//
-//                while(elementIterator.hasNext()) {
-//                    INDIElement picture = elementIterator.next();
-//                    String elementName = picture.getName();
-//                    if (elementName.equals("CONNECT")) {
-//                        picture.setDesiredValue(Constants.SwitchStatus.ON);
-//                    } else if (elementName.equals("DISCONNECT")) {
-//                        picture.setDesiredValue(Constants.SwitchStatus.OFF);
-//                    }
-//                }
-
-
-//                indiClient.getPropertyForDevice(device);
-
-//            Device hest2 = indiClient.getDevice("ZWO CCD ASI178MM");
-
-//            String hest = "";
-
     }
 
 }

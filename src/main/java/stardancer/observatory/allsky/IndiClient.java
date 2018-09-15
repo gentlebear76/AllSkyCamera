@@ -1,10 +1,8 @@
 package stardancer.observatory.allsky;
 
 import org.apache.log4j.Logger;
-
 import org.indilib.i4j.Constants;
 import org.indilib.i4j.client.*;
-import org.indilib.i4j.properties.INDIStandardProperty;
 import org.indilib.i4j.protocol.url.INDIURLStreamHandlerFactory;
 
 import java.io.IOException;
@@ -28,8 +26,6 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
     INDIProperty imageProperty;
     INDIBLOBElement picture;
 
-
-
     private INDIServerConnection indiServerConnection;
 
 
@@ -38,7 +34,6 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
         devices = new HashMap<>();
         change = false;
         indiServerConnection.addINDIServerConnectionListener(this);
-//        imageProperty.addINDIPropertyListener(externalePropertyListener);
         this.externalePropertyListener = propertyListener;
 
         try {
@@ -47,19 +42,6 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
         } catch (IOException i) {
             LOGGER.error("Cannot connect to INDI server - " + i.getMessage());
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     @Override
@@ -139,29 +121,8 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
 
     @Override
     public void elementChanged(INDIElement element) {
-//        element.addINDIElementListener();
         LOGGER.info("Element changed: " + element.getName());
-
-//        newElementArrived = true;
         change = true;
-
-//        INDIBLOBElement be = (INDIBLOBElement) picture;
-//        INDIBLOBValue v = be.getValue();
-//
-//        if (v != null) {
-//            String fileName = "ddd" + new Date() + v.getFormat();
-//
-//            File f = new File(fileName);
-//
-//            try {
-//                LOGGER.info("Saving " + f);
-//                be.getValue().saveBLOBData(f); // Saves the data to file
-//            } catch (IOException e) {
-//                LOGGER.error("could not save " + f, e);
-//            }
-//        }
-//
-//
     }
 
     public HashMap<String,Device> getDevices() {
@@ -179,11 +140,6 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
             names.add(name);
         }
         return names;
-    }
-
-    public INDIElement getPicture() {
-        pictureArrived = false;
-        return this.picture;
     }
 
     public boolean hasNewPicture() {
@@ -210,14 +166,11 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
         indiServerConnection.removeINDIDeviceListener(device.getName(), this);
     }
 
-
     public INDIProperty getPropertyForDevice(Device device, String propertyName){
         INDIDevice someDevice =  indiServerConnection.getDevice(device.getName());
         INDIProperty<?> indiProperty = someDevice.getProperty(propertyName);
         return indiProperty;
     }
-
-
 }
 
 

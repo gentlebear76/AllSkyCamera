@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.indilib.i4j.Constants;
 import org.indilib.i4j.INDIBLOBValue;
 import org.indilib.i4j.client.*;
-import org.indilib.i4j.properties.INDIStandardProperty;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public class CameraHandler implements INDIPropertyListener {
 
@@ -25,11 +23,12 @@ public class CameraHandler implements INDIPropertyListener {
 
     private Device device;
     private IndiClient indiClient;
+    private boolean ready = true;
+    private String fileLocation;
 
-
-
-
-
+    public CameraHandler(String fileLocation) {
+        this.fileLocation = fileLocation;
+    }
 
     public void connectToCamera(IndiClient indiClient) throws IOException {
 
@@ -80,22 +79,31 @@ public class CameraHandler implements INDIPropertyListener {
 
     public void propertyChanged(INDIProperty property) {
         if (indiClient.hasNewPicture() && property.getName().equals("CCD1")) {
-
+            ready = false;
             INDIBLOBValue imageValue = (INDIBLOBValue) property.getElement("CCD1").getValue();
-
-            getImage(imageValue);
+            saveImage(imageValue);
+            try {
+                Thread.sleep(1000); //We wait a second or so to make sure the server has time to keep up.
+            } catch (InterruptedException i) {
+                LOGGER.info("Gotta get up and fly!");
+            }
+            ready = true;
         }
     }
 
-
     public void setImageDepth(ImageDepth imageDepth) {
-
-
-
 
     }
 
-    public void setCCDExposure(Double seconds) throws NullPointerException {
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setCCDExposure(Double seconds) throws InterruptedException, NullPointerException {
+        while (!this.isReady()) {
+            Thread.sleep(1000);
+        }
+
         if (device == null) {
             throw new NullPointerException("Trying to change the exposure time on a non-existant camera, are we... Tsk tsk...");
         }
@@ -114,12 +122,12 @@ public class CameraHandler implements INDIPropertyListener {
             return;
         }
 
-        INDIProperty exposure;
         for (INDIProperty property : properties) {
             if (property.getName().equals("CCD_EXPOSURE")) {
                 try {
                     property.getElement("CCD_EXPOSURE_VALUE").setDesiredValue(seconds);
                     property.sendChangesToDriver();
+                    ready = false;
                     device.updateProperty(property);
                     break;
                 } catch (INDIValueException i) {
@@ -129,28 +137,19 @@ public class CameraHandler implements INDIPropertyListener {
                 }
             }
         }
-
     }
 
-    public void getImage(INDIBLOBValue picture) {
-
-//        INDIBLOBProperty indiBlobProperty = null;
-
-//        while (indiBlobProperty == null) {
-            try {
-//                indiBlobProperty = picture;
-                if (picture != null) {
-                    File file = new File("c:\\temp\\image_" + LocalDateTime.now().
-                            format(DateTimeFormatter.ofPattern("yyyy_MMM_d-H-m-s")) + ".fits");
-                    picture.saveBLOBData(file);
-                }
-            } catch (IOException i) {
-                LOGGER.error("Some error happened writing to a file! " + i.getMessage());
+    public void saveImage(INDIBLOBValue picture) {
+        try {
+            if (picture != null) {
+                File file = new File(fileLocation + "\\image_" + LocalDateTime.now().
+                        format(DateTimeFormatter.ofPattern("yyyy_MMM_d-H-m-s")) + ".fits");
+                picture.saveBLOBData(file);
+                ready = true;
             }
-
+        } catch (IOException i) {
+            LOGGER.error("Some error happened writing to a file! " + i.getMessage());
+        }
     }
-
-
-
 }
 

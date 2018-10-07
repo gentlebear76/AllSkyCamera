@@ -5,8 +5,15 @@ import org.indilib.i4j.Constants;
 import org.indilib.i4j.INDIBLOBValue;
 import org.indilib.i4j.client.*;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
@@ -25,6 +32,9 @@ public class CameraHandler implements INDIPropertyListener {
     private IndiClient indiClient;
     private boolean ready = true;
     private String fileLocation;
+
+    private int imageWidth;
+    private int imageHeight;
 
     public CameraHandler(String fileLocation) {
         this.fileLocation = fileLocation;
@@ -75,13 +85,50 @@ public class CameraHandler implements INDIPropertyListener {
                 throw i;
             }
         }
+
+        for (INDIProperty property : properties) {
+            if (property.getName().equals("CCD_CONTROLS")) {
+                specificProperty = property;
+                break;
+            }
+        }
+
+        if (specificProperty != null) {
+            Iterator<INDIElement> elementIterator = specificProperty.iterator();
+
+            try {
+                while (elementIterator.hasNext()) {
+                    INDIElement element = elementIterator.next();
+                    String elementName = element.getName();
+                    if (elementName.equals("Gain")) {
+                            element.setDesiredValue(0);//50.0);
+                            specificProperty.sendChangesToDriver();
+                            break;
+
+                    }
+                }
+
+            } catch (INDIValueException i) {
+
+            } catch (IOException i) {
+
+            }
+        }
+
     }
 
     public void propertyChanged(INDIProperty property) {
+        if (imageWidth == 0.0 && imageHeight == 0.0) {
+            imageWidth = (int) Math.round((double) property.getDevice().getProperty("CCD_FRAME").getElement("WIDTH").getValue());
+            imageHeight = (int) Math.round((double) property.getDevice().getProperty("CCD_FRAME").getElement("HEIGHT").getValue());
+        }
+
         if (indiClient.hasNewPicture() && property.getName().equals("CCD1")) {
             ready = false;
             INDIBLOBValue imageValue = (INDIBLOBValue) property.getElement("CCD1").getValue();
-            saveImage(imageValue);
+
+//            saveImage(imageValue);
+            saveImageAsPNG(imageValue);
             try {
                 Thread.sleep(1000); //We wait a second or so to make sure the server has time to keep up.
             } catch (InterruptedException i) {
@@ -139,6 +186,29 @@ public class CameraHandler implements INDIPropertyListener {
         }
     }
 
+    /**
+     * This method saves the images from the camera as png-files.
+     * @param picture The raw picture data from the camera
+     */
+    public void saveImageAsPNG(INDIBLOBValue picture) {
+        try {
+            if (picture != null) {
+                File file = new File(fileLocation + "\\image_" + LocalDateTime.now()
+                        .format(DateTimeFormatter.ofPattern("yyyy_MMM_d-H-m-s")) + ".png");
+                InputStream is = new ByteArrayInputStream(picture.getBlobData());
+                BufferedImage bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_BYTE_GRAY);
+                bufferedImage.setData(Raster.createRaster(bufferedImage.getSampleModel(), new DataBufferByte(picture.getBlobData(), picture.getSize()), new Point()));
+                ImageIO.write(bufferedImage, "png", file);
+            }
+        } catch (IOException i) {
+            LOGGER.error("Could not save image! " + i.getMessage());
+        }
+    }
+
+    /**
+     * This method saves the images from the camera as fits-files.
+     * @param picture The raw picture data from the camera
+     */
     public void saveImage(INDIBLOBValue picture) {
         try {
             if (picture != null) {

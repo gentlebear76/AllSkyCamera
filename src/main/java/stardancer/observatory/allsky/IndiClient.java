@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class IndiClient implements INDIServerConnectionListener, INDIDeviceListener, INDIPropertyListener, INDIElementListener {
@@ -25,6 +26,7 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
     INDIPropertyListener externalePropertyListener;
     INDIProperty imageProperty;
     INDIBLOBElement picture;
+    List<INDIProperty> propertyList;
 
     private INDIServerConnection indiServerConnection;
 
@@ -33,6 +35,7 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
         indiServerConnection = new INDIServerConnection(host, port);
         devices = new HashMap<>();
         change = false;
+        propertyList = new ArrayList<>();
         indiServerConnection.addINDIServerConnectionListener(this);
         this.externalePropertyListener = propertyListener;
 
@@ -103,6 +106,11 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
 
     @Override
     public void propertyChanged(INDIProperty<?> property) {
+
+        if (!propertyList.contains(property)) {
+            propertyList.add(property);
+        }
+
         imageProperty = property;
         LOGGER.info("Property changed: " + property.getNameStateAndValuesAsString());
 

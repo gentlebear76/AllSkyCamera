@@ -25,12 +25,16 @@ public class CommandLineController {
         Option helpOption = new Option("h", "help", false, "Print this message");
         helpOption.setArgName("help message");
 
+        Option directoryOption = new Option("f", "destinationDir", true, "Image destination directory");
+        directoryOption.setArgName("destination directory");
+
         Options options = new Options();
         options.addOption(logLevelOption);
         options.addOption(debugLogOption);
         options.addOption(hostOption);
         options.addOption(portOption);
         options.addOption(helpOption);
+        options.addOption(directoryOption);
 
         return options;
     }

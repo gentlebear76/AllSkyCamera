@@ -101,16 +101,20 @@ public class CameraHandler implements INDIPropertyListener {
                     INDIElement element = elementIterator.next();
                     String elementName = element.getName();
                     if (elementName.equals("Gain")) {
-                            element.setDesiredValue(0);//50.0);
-                            specificProperty.sendChangesToDriver();
-                            break;
-
+                        element.setDesiredValue(100.0);
+                        specificProperty.sendChangesToDriver();
+                        Thread.sleep(1000);
+                        element.setDesiredValue(150.0);
+                        specificProperty.sendChangesToDriver();
+                        break;
                     }
                 }
 
             } catch (INDIValueException i) {
 
             } catch (IOException i) {
+
+            } catch (InterruptedException i) {
 
             }
         }
@@ -193,7 +197,7 @@ public class CameraHandler implements INDIPropertyListener {
     public void saveImageAsPNG(INDIBLOBValue picture) {
         try {
             if (picture != null) {
-                File file = new File(fileLocation + "\\image_" + LocalDateTime.now()
+                File file = new File(fileLocation + "/" + "image_" + LocalDateTime.now()
                         .format(DateTimeFormatter.ofPattern("yyyy_MMM_d-H-m-s")) + ".png");
                 InputStream is = new ByteArrayInputStream(picture.getBlobData());
                 BufferedImage bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_BYTE_GRAY);
@@ -212,7 +216,7 @@ public class CameraHandler implements INDIPropertyListener {
     public void saveImage(INDIBLOBValue picture) {
         try {
             if (picture != null) {
-                File file = new File(fileLocation + "\\image_" + LocalDateTime.now().
+                File file = new File(fileLocation + "/" + "image_" + LocalDateTime.now().
                         format(DateTimeFormatter.ofPattern("yyyy_MMM_d-H-m-s")) + ".fits");
                 picture.saveBLOBData(file);
                 ready = true;

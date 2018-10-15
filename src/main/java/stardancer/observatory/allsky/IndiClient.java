@@ -23,7 +23,7 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
     HashMap<String,Device> devices;
     boolean change;
     boolean pictureArrived = false;
-    INDIPropertyListener externalePropertyListener;
+    INDIPropertyListener externalPropertyListener;
     INDIProperty imageProperty;
     INDIBLOBElement picture;
     List<INDIProperty> propertyList;
@@ -37,7 +37,7 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
         change = false;
         propertyList = new ArrayList<>();
         indiServerConnection.addINDIServerConnectionListener(this);
-        this.externalePropertyListener = propertyListener;
+        this.externalPropertyListener = propertyListener;
 
         try {
             indiServerConnection.connect();
@@ -87,7 +87,7 @@ public class IndiClient implements INDIServerConnectionListener, INDIDeviceListe
         change = true;
         property.addINDIPropertyListener(this);
         if (property.getName().equals("CCD1")) {
-            property.addINDIPropertyListener(externalePropertyListener);
+            property.addINDIPropertyListener(externalPropertyListener);
         }
     }
 

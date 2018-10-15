@@ -15,11 +15,15 @@ public class AllSkyCamera {
     IndiClient indiClient;
     static String host;
     static String port;
+    static String destinationDirectory;
 
     Device device;
     CameraHandler cameraHandler;
     boolean keepRunning = false;
-    double exposureTime = 0.5;
+    double exposureTime = 60.0;
+
+
+    //TODO - Set gain and offset - 60 secs are quite dark on default settings!
 
     private void connectToServer() {
         indiClient = new IndiClient(host, Integer.parseInt(port), cameraHandler);
@@ -39,7 +43,7 @@ public class AllSkyCamera {
 
 
     private void start() {
-        cameraHandler = new CameraHandler("c:\\temp");
+        cameraHandler = new CameraHandler(destinationDirectory);
         connectToServer();
 
         try {
@@ -80,6 +84,7 @@ public class AllSkyCamera {
 
         host = cmd.getOptionValue("s", "127.0.0.1");
         port = cmd.getOptionValue("p", Integer.toString(Constants.INDI_DEFAULT_PORT));
+        destinationDirectory = cmd.getOptionValue("f", ".");
 
         AllSkyCamera allSkyCamera = new AllSkyCamera();
 

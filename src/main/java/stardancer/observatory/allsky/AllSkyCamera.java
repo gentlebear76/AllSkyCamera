@@ -76,11 +76,11 @@ public class AllSkyCamera {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
-        Logging.setupLogConsoleLogger();
+//        Logging.setupLogConsoleLogger();
         CommandLine cmd = CommandLineController.parseCommandLine(args);
-//        Logging.setupFileLogger(cmd);
+        Logging.setupFileLogger(cmd);
 
         host = cmd.getOptionValue("s", "127.0.0.1");
         port = cmd.getOptionValue("p", Integer.toString(Constants.INDI_DEFAULT_PORT));

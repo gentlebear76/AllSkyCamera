@@ -25,7 +25,7 @@ public class Logging {
             fileAppender.setLayout(new PatternLayout(LOG_PATTERN));
             fileAppender.setThreshold(logLevel);
             fileAppender.setFile(commandLine.getOptionValue(DEBUG_LOG_COMMAND, DEFAULT_LOG_FILE_NAME));
-            fileAppender.setAppend(true);
+            fileAppender.setAppend(false);
             fileAppender.activateOptions();
 
             Logger.getRootLogger().setLevel(logLevel);

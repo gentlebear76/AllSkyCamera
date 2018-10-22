@@ -36,6 +36,10 @@ public class CameraHandler implements INDIPropertyListener {
     private int imageWidth;
     private int imageHeight;
 
+//    private long imageCounter = 1;
+
+    List<INDIProperty> properties;
+
     public CameraHandler(String fileLocation) {
         this.fileLocation = fileLocation;
     }
@@ -45,7 +49,7 @@ public class CameraHandler implements INDIPropertyListener {
         this.indiClient = indiClient;
 
         device = indiClient.getDevice("ZWO CCD ASI178MM");
-        List<INDIProperty> properties = device.getAllProperties();
+        properties = device.getAllProperties();
 
         INDIProperty specificProperty = null;
 
@@ -86,6 +90,12 @@ public class CameraHandler implements INDIPropertyListener {
             }
         }
 
+
+
+    }
+
+    private void updateGain() {
+        INDIProperty specificProperty = null;
         for (INDIProperty property : properties) {
             if (property.getName().equals("CCD_CONTROLS")) {
                 specificProperty = property;
@@ -101,11 +111,14 @@ public class CameraHandler implements INDIPropertyListener {
                     INDIElement element = elementIterator.next();
                     String elementName = element.getName();
                     if (elementName.equals("Gain")) {
+                        LOGGER.debug("Gain is at present - " + element.getValue());
+                        element.setDesiredValue(50.0);
+                        specificProperty.sendChangesToDriver();
+                        Thread.sleep(1000);
                         element.setDesiredValue(100.0);
                         specificProperty.sendChangesToDriver();
                         Thread.sleep(1000);
-                        element.setDesiredValue(150.0);
-                        specificProperty.sendChangesToDriver();
+                        LOGGER.debug("Now gain is  - " + element.getValue());
                         break;
                     }
                 }
@@ -118,7 +131,6 @@ public class CameraHandler implements INDIPropertyListener {
 
             }
         }
-
     }
 
     public void propertyChanged(INDIProperty property) {
@@ -151,9 +163,12 @@ public class CameraHandler implements INDIPropertyListener {
     }
 
     public void setCCDExposure(Double seconds) throws InterruptedException, NullPointerException {
+        LOGGER.debug("Running exposure - exposure length is " + seconds + " seconds!");
         while (!this.isReady()) {
             Thread.sleep(1000);
         }
+
+        updateGain(); //We update the gain value for every exposure. Earlier we only did this on camera connect and that, for some reason, resulted in the gain sliding downwards over time... Why I have no idea!
 
         if (device == null) {
             throw new NullPointerException("Trying to change the exposure time on a non-existant camera, are we... Tsk tsk...");
@@ -199,7 +214,8 @@ public class CameraHandler implements INDIPropertyListener {
             if (picture != null) {
                 File file = new File(fileLocation + "/" + "image_" + LocalDateTime.now()
                         .format(DateTimeFormatter.ofPattern("yyyy_MMM_d-H-m-s")) + ".png");
-                InputStream is = new ByteArrayInputStream(picture.getBlobData());
+//                File file = new File(fileLocation + "/" + "image_" + imageCounter + ".png");
+//                imageCounter++;
                 BufferedImage bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_BYTE_GRAY);
                 bufferedImage.setData(Raster.createRaster(bufferedImage.getSampleModel(), new DataBufferByte(picture.getBlobData(), picture.getSize()), new Point()));
                 ImageIO.write(bufferedImage, "png", file);

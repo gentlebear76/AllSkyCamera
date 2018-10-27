@@ -3,7 +3,6 @@ package stardancer.observatory.allsky;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.log4j.Logger;
-import org.indilib.i4j.Constants;
 
 import java.io.IOException;
 
@@ -13,20 +12,23 @@ public class AllSkyCamera {
     private static final Logger LOGGER = Logger.getLogger(AllSkyCamera.class);
 
     IndiClient indiClient;
-    static String host;
-    static String port;
     static String destinationDirectory;
 
     Device device;
     CameraHandler cameraHandler;
     boolean keepRunning = false;
     double exposureTime = 60.0;
+    Settings settings;
 
+
+    public AllSkyCamera(Settings settings) {
+        this.settings = settings;
+    }
 
     //TODO - Set gain and offset - 60 secs are quite dark on default settings!
 
     private void connectToServer() {
-        indiClient = new IndiClient(host, Integer.parseInt(port), cameraHandler);
+        indiClient = new IndiClient(settings.getStringSettingFor(Settings.INDI_SERVER_IP), Integer.parseInt(Settings.INDI_SERVER_PORT), cameraHandler);
 
         while (!indiClient.hasChange()) {
             try {
@@ -43,7 +45,7 @@ public class AllSkyCamera {
 
 
     private void start() {
-        cameraHandler = new CameraHandler(destinationDirectory);
+        cameraHandler = new CameraHandler(settings.getStringSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY));
         connectToServer();
 
         try {
@@ -52,7 +54,7 @@ public class AllSkyCamera {
 
             keepRunning = true;
 
-            takePictures(exposureTime);
+            startImagingLoop();
 
         } catch (IOException i) {
             LOGGER.error("Got an error when trying to connect to the camera! " + i.getMessage());
@@ -61,11 +63,11 @@ public class AllSkyCamera {
         }
     }
 
-    private void takePictures(double exposureTime) {
-        while (keepRunning) {
+    private void startImagingLoop() {
+        while (settings.getBooleanSettingFor(Settings.KEEP_EXPOSING_CAMERA)) {
             try {
                 Thread.sleep(1000);
-                cameraHandler.setCCDExposure(exposureTime);
+                cameraHandler.exposeCCD(settings.getDoubleSettingFor(Settings.CAMERA_EXPOSURE_TIME));
 
                 while (!indiClient.pictureArrived) {
                     Thread.sleep(500);
@@ -77,16 +79,34 @@ public class AllSkyCamera {
     }
 
     public static void main(String[] args) {
-
+        Settings settings = new Settings();
 //        Logging.setupLogConsoleLogger();
         CommandLine cmd = CommandLineController.parseCommandLine(args);
         Logging.setupFileLogger(cmd);
 
-        host = cmd.getOptionValue("s", "127.0.0.1");
-        port = cmd.getOptionValue("p", Integer.toString(Constants.INDI_DEFAULT_PORT));
-        destinationDirectory = cmd.getOptionValue("f", ".");
+        settings.setSettingFor(Settings.INDI_SERVER_IP, cmd.getOptionValue("s", settings.getStringSettingFor(Settings.INDI_SERVER_IP)));
+        settings.setSettingFor(Settings.INDI_SERVER_PORT, cmd.getOptionValue("p", settings.getStringSettingFor(Settings.INDI_SERVER_PORT)));
+        settings.setSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY, cmd.getOptionValue("f", settings.getStringSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY)));
 
-        AllSkyCamera allSkyCamera = new AllSkyCamera();
+        Server inputServer = new Server(settings);
+        Thread serverThread = new Thread(inputServer);
+        serverThread.start();
+
+//        while (true) {
+//            try {
+//                Thread.sleep(1000);
+//                System.out.println(settings.toString());
+//            } catch (InterruptedException i) {
+//
+//            }
+//
+//        }
+
+
+
+        TwilightDataRetriever.getTwilightInformation();
+
+        AllSkyCamera allSkyCamera = new AllSkyCamera(settings);
 
         allSkyCamera.start();
     }

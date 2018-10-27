@@ -3,9 +3,12 @@ package stardancer.observatory.allsky;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import org.apache.log4j.Logger;
 import org.indilib.i4j.client.INDIProperty;
 
 public class Device {
+
+    private static final Logger LOGGER = Logger.getLogger(Device.class);
 
     private String name;
     private LinkedHashMap<String,ArrayList<INDIProperty>> groups;

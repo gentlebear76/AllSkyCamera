@@ -32,6 +32,7 @@ public class CameraHandler implements INDIPropertyListener {
     private IndiClient indiClient;
     private boolean ready = true;
     private String fileLocation;
+    private Settings settings;
 
     private int imageWidth;
     private int imageHeight;
@@ -40,8 +41,9 @@ public class CameraHandler implements INDIPropertyListener {
 
     List<INDIProperty> properties;
 
-    public CameraHandler(String fileLocation) {
-        this.fileLocation = fileLocation;
+    public CameraHandler(Settings settings) {
+        this.settings = settings;
+
     }
 
     public void connectToCamera(IndiClient indiClient) throws IOException {
@@ -112,10 +114,10 @@ public class CameraHandler implements INDIPropertyListener {
                     String elementName = element.getName();
                     if (elementName.equals("Gain")) {
                         LOGGER.debug("Gain is at present - " + element.getValue());
-                        element.setDesiredValue(50.0);
+                        element.setDesiredValue(settings.getDoubleSettingFor(Settings.CAMERA_GAIN) + 5); //We set the gain to what we want + a random number to force an update
                         specificProperty.sendChangesToDriver();
                         Thread.sleep(1000);
-                        element.setDesiredValue(100.0);
+                        element.setDesiredValue(settings.getDoubleSettingFor(Settings.CAMERA_GAIN)); //Here we set the gain value to what we want.
                         specificProperty.sendChangesToDriver();
                         Thread.sleep(1000);
                         LOGGER.debug("Now gain is  - " + element.getValue());
@@ -162,8 +164,8 @@ public class CameraHandler implements INDIPropertyListener {
         return ready;
     }
 
-    public void setCCDExposure(Double seconds) throws InterruptedException, NullPointerException {
-        LOGGER.debug("Running exposure - exposure length is " + seconds + " seconds!");
+    public void exposeCCD() throws InterruptedException, NullPointerException {
+        LOGGER.debug("Running exposure - exposure length is " + settings.getStringSettingFor(Settings.CAMERA_EXPOSURE_TIME) + " seconds!");
         while (!this.isReady()) {
             Thread.sleep(1000);
         }
@@ -191,7 +193,7 @@ public class CameraHandler implements INDIPropertyListener {
         for (INDIProperty property : properties) {
             if (property.getName().equals("CCD_EXPOSURE")) {
                 try {
-                    property.getElement("CCD_EXPOSURE_VALUE").setDesiredValue(seconds);
+                    property.getElement("CCD_EXPOSURE_VALUE").setDesiredValue(settings.getDoubleSettingFor(Settings.CAMERA_EXPOSURE_TIME));
                     property.sendChangesToDriver();
                     ready = false;
                     device.updateProperty(property);
@@ -212,7 +214,7 @@ public class CameraHandler implements INDIPropertyListener {
     public void saveImageAsPNG(INDIBLOBValue picture) {
         try {
             if (picture != null) {
-                File file = new File(fileLocation + "/" + "image_" + LocalDateTime.now()
+                File file = new File(settings.getStringSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY) + "/" + "image_" + LocalDateTime.now()
                         .format(DateTimeFormatter.ofPattern("yyyy_MMM_d-H-m-s")) + ".png");
 //                File file = new File(fileLocation + "/" + "image_" + imageCounter + ".png");
 //                imageCounter++;
@@ -232,7 +234,7 @@ public class CameraHandler implements INDIPropertyListener {
     public void saveImage(INDIBLOBValue picture) {
         try {
             if (picture != null) {
-                File file = new File(fileLocation + "/" + "image_" + LocalDateTime.now().
+                File file = new File(settings.getStringSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY) + "/" + "image_" + LocalDateTime.now().
                         format(DateTimeFormatter.ofPattern("yyyy_MMM_d-H-m-s")) + ".fits");
                 picture.saveBLOBData(file);
                 ready = true;

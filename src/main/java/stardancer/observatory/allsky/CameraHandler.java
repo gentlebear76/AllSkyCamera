@@ -48,6 +48,7 @@ public class CameraHandler implements INDIPropertyListener {
 
     public void connectToCamera(IndiClient indiClient) throws IOException {
 
+        LOGGER.debug("Connecting to camera!");
         this.indiClient = indiClient;
 
         device = indiClient.getDevice("ZWO CCD ASI178MM");

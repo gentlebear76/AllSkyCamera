@@ -18,11 +18,11 @@ public class Settings {
 
     private final String STANDARD_INDI_SERVER_IP = "127.0.0.1";
     private final String STANDARD_INDI_SERVER_PORT = Integer.toString(Constants.INDI_DEFAULT_PORT);
-    private final String STANDARD_EXPOSURE_TIME = "1";
+    private final String STANDARD_EXPOSURE_TIME = "30";
     private final String STANDARD_CAMERA_GAIN = "0";
     private final String STANDARD_CAMERA_IMAGE_DOWNLOAD_DIRECTORY = ".";
     private final String STANDARD_ALL_SKY_CAMERA_SERVER_PORT = "4242";
-    private final String STANDARD_KEEP_EXPOSING_CAMERA = "false";
+    private final String STANDARD_KEEP_EXPOSING_CAMERA = "true";
 
     Map<String, String> settings = new HashMap<>();
 

@@ -58,9 +58,8 @@ public class Server implements Runnable {
             LOGGER.debug("ServerRunner - Starting up new communication server!");
             try (
                 PrintWriter out = new PrintWriter(inputSocket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(inputSocket.getInputStream()));)
+                BufferedReader in = new BufferedReader(new InputStreamReader(inputSocket.getInputStream())))
             {
-
                 String input = in.readLine();
                 parseInput(input);
                 String outputLine = input;

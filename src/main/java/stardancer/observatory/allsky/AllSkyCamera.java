@@ -17,7 +17,7 @@ public class AllSkyCamera {
     Device device;
     CameraHandler cameraHandler;
     boolean keepRunning = false;
-    double exposureTime = 60.0;
+    double exposureTime = 10.0;
     Settings settings;
 
 
@@ -28,7 +28,7 @@ public class AllSkyCamera {
     //TODO - Set gain and offset - 60 secs are quite dark on default settings!
 
     private void connectToServer() {
-        indiClient = new IndiClient(settings.getStringSettingFor(Settings.INDI_SERVER_IP), Integer.parseInt(Settings.INDI_SERVER_PORT), cameraHandler);
+        indiClient = new IndiClient(settings.getStringSettingFor(Settings.INDI_SERVER_IP),settings.getIntSettingFor(Settings.INDI_SERVER_PORT), cameraHandler);
 
         while (!indiClient.hasChange()) {
             try {
@@ -45,7 +45,7 @@ public class AllSkyCamera {
 
 
     private void start() {
-        cameraHandler = new CameraHandler(settings.getStringSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY));
+        cameraHandler = new CameraHandler(settings);
         connectToServer();
 
         try {
@@ -64,18 +64,22 @@ public class AllSkyCamera {
     }
 
     private void startImagingLoop() {
+        LOGGER.debug("Starting imaging loop!");
         while (settings.getBooleanSettingFor(Settings.KEEP_EXPOSING_CAMERA)) {
             try {
                 Thread.sleep(1000);
-                cameraHandler.exposeCCD(settings.getDoubleSettingFor(Settings.CAMERA_EXPOSURE_TIME));
+                LOGGER.debug("Starting exposure!");
+                cameraHandler.exposeCCD();
 
                 while (!indiClient.pictureArrived) {
                     Thread.sleep(500);
+                    LOGGER.debug("Waiting for image!");
                 }
             } catch (InterruptedException i) {
                 LOGGER.info("Sleep interrupted for some reason... No worries, I'll get up now.");
             }
         }
+        LOGGER.debug("Ending imaging loop!");
     }
 
     public static void main(String[] args) {
@@ -104,7 +108,7 @@ public class AllSkyCamera {
 
 
 
-        TwilightDataRetriever.getTwilightInformation();
+//        TwilightDataRetriever.getTwilightInformation();
 
         AllSkyCamera allSkyCamera = new AllSkyCamera(settings);
 

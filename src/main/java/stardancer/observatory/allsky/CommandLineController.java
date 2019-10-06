@@ -31,6 +31,9 @@ public class CommandLineController {
         Option exposureTime = new Option("e", "exposureTime", true, "Exposure time");
         exposureTime.setArgName("exposure time");
 
+        Option exposureInterval = new Option("i", "exposureInterval", true, "Exposure interval");
+        exposureInterval.setArgName("exposure interval");
+
         Options options = new Options();
         options.addOption(logLevelOption);
         options.addOption(debugLogOption);
@@ -39,6 +42,7 @@ public class CommandLineController {
         options.addOption(helpOption);
         options.addOption(directoryOption);
         options.addOption(exposureTime);
+        options.addOption(exposureInterval);
 
         return options;
     }
@@ -49,7 +53,7 @@ public class CommandLineController {
             LOGGER.error("Error: " + error + "\n");
         }
 
-        formatter.printHelp("java -jar <jar-file-name> [-s <server ip>] [-p <port number>] [-l <loglevel>] [-d <log file name>] ", "", options,"");
+        formatter.printHelp("java -jar <jar-file-name> [-s <server ip>] [-p <port number>] [-l <loglevel>] [-d <log file name>] [-e <exposure time>] [-i >exposure interval>]", "", options,"");
     }
 
     public static org.apache.commons.cli.CommandLine parseCommandLine(String[] args) throws RuntimeException {

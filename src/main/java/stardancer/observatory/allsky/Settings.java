@@ -11,6 +11,7 @@ public class Settings {
     public static final String INDI_SERVER_IP = "Indi_Server_Ip";
     public static final String INDI_SERVER_PORT = "Indi_Server_Port";
     public static final String CAMERA_EXPOSURE_TIME = "Camera_Exposure_Time";
+    public static final String CAMERA_EXPOSURE_INTERVAL = "Camera_Exposure_Interval";
     public static final String CAMERA_GAIN = "Camera_Gain";
     public static final String CAMERA_IMAGE_DOWNLOAD_DIRECTORY = "Camera_Image_Download_Directory";
     public static final String ALL_SKY_CAMERA_SERVER_PORT = "All_Sky_Camera_Server_Port";
@@ -20,6 +21,7 @@ public class Settings {
     private final String STANDARD_INDI_SERVER_IP = "127.0.0.1";
     private final String STANDARD_INDI_SERVER_PORT = Integer.toString(Constants.INDI_DEFAULT_PORT);
     private final String STANDARD_EXPOSURE_TIME = "60";
+    private final String STANDARD_EXPOSURE_INTERVAL = "0";
     private final String STANDARD_CAMERA_GAIN = "100";
     private final String STANDARD_CAMERA_IMAGE_DOWNLOAD_DIRECTORY = ".";
     private final String STANDARD_ALL_SKY_CAMERA_SERVER_PORT = "4242";
@@ -31,6 +33,7 @@ public class Settings {
         settings.put(INDI_SERVER_IP, STANDARD_INDI_SERVER_IP);
         settings.put(INDI_SERVER_PORT, STANDARD_INDI_SERVER_PORT);
         settings.put(CAMERA_EXPOSURE_TIME, STANDARD_EXPOSURE_TIME);
+        settings.put(CAMERA_EXPOSURE_INTERVAL, STANDARD_EXPOSURE_INTERVAL);
         settings.put(CAMERA_GAIN, STANDARD_CAMERA_GAIN);
         settings.put(CAMERA_IMAGE_DOWNLOAD_DIRECTORY, STANDARD_CAMERA_IMAGE_DOWNLOAD_DIRECTORY);
         settings.put(ALL_SKY_CAMERA_SERVER_PORT, STANDARD_ALL_SKY_CAMERA_SERVER_PORT);

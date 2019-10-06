@@ -68,13 +68,21 @@ public class AllSkyCamera {
         LOGGER.debug("Starting imaging loop!");
         while (settings.getBooleanSettingFor(Settings.EXPOSE_CAMERA)) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1000); //Standard sleep - just to be sure
                 LOGGER.debug("Starting exposure!");
                 cameraHandler.exposeCCD();
 
                 while (!indiClient.pictureArrived) {
                     Thread.sleep(500);
                     LOGGER.debug("Waiting for image!");
+                }
+
+                if (settings.getIntSettingFor(Settings.CAMERA_EXPOSURE_INTERVAL) > 0) {
+                    int sleepInterval = settings.getIntSettingFor(Settings.CAMERA_EXPOSURE_INTERVAL) * 1000; //We multiply by 1000 as sleep needs millis and we give seconds
+                    LOGGER.debug("This is the exposure interval! Sleeping for " + sleepInterval + " milliseconds!");
+                    Thread.sleep(sleepInterval);
+                } else {
+                    LOGGER.debug("This is the exposure interval! No exposure interval given. Not sleeping!");
                 }
             } catch (InterruptedException i) {
                 LOGGER.info("Sleep interrupted for some reason... No worries, I'll get up now.");
@@ -93,6 +101,7 @@ public class AllSkyCamera {
         settings.setSettingFor(Settings.INDI_SERVER_PORT, cmd.getOptionValue("p", settings.getStringSettingFor(Settings.INDI_SERVER_PORT)));
         settings.setSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY, cmd.getOptionValue("f", settings.getStringSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY)));
         settings.setSettingFor(Settings.CAMERA_EXPOSURE_TIME, cmd.getOptionValue("e", settings.getStringSettingFor(Settings.CAMERA_EXPOSURE_TIME)));
+        settings.setSettingFor(Settings.CAMERA_EXPOSURE_INTERVAL, cmd.getOptionValue("i", settings.getStringSettingFor(Settings.CAMERA_EXPOSURE_INTERVAL)));
 
         Server inputServer = new Server(settings);
         Thread serverThread = new Thread(inputServer);

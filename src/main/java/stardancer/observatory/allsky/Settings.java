@@ -8,13 +8,14 @@ import java.util.Map;
 public class Settings {
 
     //Setting Names
-    public static final String INDI_SERVER_IP = "Indi.Server.Ip";
-    public static final String INDI_SERVER_PORT = "Indi.Server.Port";
-    public static final String CAMERA_EXPOSURE_TIME = "Camera.Exposure.Time";
-    public static final String CAMERA_GAIN = "Camera.Gain";
-    public static final String CAMERA_IMAGE_DOWNLOAD_DIRECTORY = "Camera.Image.Download.Directory";
-    public static final String ALL_SKY_CAMERA_SERVER_PORT = "All.Sky.Camera.Server.Port";
-    public static final String KEEP_EXPOSING_CAMERA = "Keep.Exposing.Camera";
+    public static final String INDI_SERVER_IP = "Indi_Server_Ip";
+    public static final String INDI_SERVER_PORT = "Indi_Server_Port";
+    public static final String CAMERA_EXPOSURE_TIME = "Camera_Exposure_Time";
+    public static final String CAMERA_GAIN = "Camera_Gain";
+    public static final String CAMERA_IMAGE_DOWNLOAD_DIRECTORY = "Camera_Image_Download_Directory";
+    public static final String ALL_SKY_CAMERA_SERVER_PORT = "All_Sky_Camera_Server_Port";
+    public static final String EXPOSE_CAMERA = "Keep_Exposing_Camera";
+    public static final String SINGLE_EXPOSURE = "Single_Exposure";
 
     private final String STANDARD_INDI_SERVER_IP = "127.0.0.1";
     private final String STANDARD_INDI_SERVER_PORT = Integer.toString(Constants.INDI_DEFAULT_PORT);
@@ -22,7 +23,7 @@ public class Settings {
     private final String STANDARD_CAMERA_GAIN = "100";
     private final String STANDARD_CAMERA_IMAGE_DOWNLOAD_DIRECTORY = ".";
     private final String STANDARD_ALL_SKY_CAMERA_SERVER_PORT = "4242";
-    private final String STANDARD_KEEP_EXPOSING_CAMERA = "true";
+    private final String STANDARD_EXPOSE_CAMERA = "true";
 
     Map<String, String> settings = new HashMap<>();
 
@@ -33,7 +34,7 @@ public class Settings {
         settings.put(CAMERA_GAIN, STANDARD_CAMERA_GAIN);
         settings.put(CAMERA_IMAGE_DOWNLOAD_DIRECTORY, STANDARD_CAMERA_IMAGE_DOWNLOAD_DIRECTORY);
         settings.put(ALL_SKY_CAMERA_SERVER_PORT, STANDARD_ALL_SKY_CAMERA_SERVER_PORT);
-        settings.put(KEEP_EXPOSING_CAMERA, STANDARD_KEEP_EXPOSING_CAMERA);
+        settings.put(EXPOSE_CAMERA, STANDARD_EXPOSE_CAMERA);
     }
 
     public String getStringSettingFor(String settingName) {

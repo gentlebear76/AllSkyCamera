@@ -64,8 +64,9 @@ public class AllSkyCamera {
     }
 
     private void startImagingLoop() {
+
         LOGGER.debug("Starting imaging loop!");
-        while (settings.getBooleanSettingFor(Settings.KEEP_EXPOSING_CAMERA)) {
+        while (settings.getBooleanSettingFor(Settings.EXPOSE_CAMERA)) {
             try {
                 Thread.sleep(1000);
                 LOGGER.debug("Starting exposure!");
@@ -91,6 +92,7 @@ public class AllSkyCamera {
         settings.setSettingFor(Settings.INDI_SERVER_IP, cmd.getOptionValue("s", settings.getStringSettingFor(Settings.INDI_SERVER_IP)));
         settings.setSettingFor(Settings.INDI_SERVER_PORT, cmd.getOptionValue("p", settings.getStringSettingFor(Settings.INDI_SERVER_PORT)));
         settings.setSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY, cmd.getOptionValue("f", settings.getStringSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY)));
+        settings.setSettingFor(Settings.CAMERA_EXPOSURE_TIME, cmd.getOptionValue("e", settings.getStringSettingFor(Settings.CAMERA_EXPOSURE_TIME)));
 
         Server inputServer = new Server(settings);
         Thread serverThread = new Thread(inputServer);

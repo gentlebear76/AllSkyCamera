@@ -28,6 +28,9 @@ public class CommandLineController {
         Option directoryOption = new Option("f", "destinationDir", true, "Image destination directory");
         directoryOption.setArgName("destination directory");
 
+        Option exposureTime = new Option("e", "exposureTime", true, "Exposure time");
+        exposureTime.setArgName("exposure time");
+
         Options options = new Options();
         options.addOption(logLevelOption);
         options.addOption(debugLogOption);
@@ -35,6 +38,7 @@ public class CommandLineController {
         options.addOption(portOption);
         options.addOption(helpOption);
         options.addOption(directoryOption);
+        options.addOption(exposureTime);
 
         return options;
     }

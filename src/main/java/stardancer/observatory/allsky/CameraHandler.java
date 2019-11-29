@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 public class CameraHandler implements INDIPropertyListener {
 
@@ -33,6 +34,7 @@ public class CameraHandler implements INDIPropertyListener {
     private boolean ready = true;
     private String fileLocation;
     private Settings settings;
+    private int gainRandomNumber = 0;
 
     private int imageWidth;
     private int imageHeight;
@@ -115,12 +117,18 @@ public class CameraHandler implements INDIPropertyListener {
                     String elementName = element.getName();
                     if (elementName.equals("Gain")) {
                         LOGGER.debug("Gain is at present - " + element.getValue());
-                        element.setDesiredValue(settings.getDoubleSettingFor(Settings.CAMERA_GAIN) + 5); //We set the gain to what we want + a random number to force an update
+                        Random random = new Random();
+                        int tmpRandom;
+                        while((tmpRandom = random.nextInt(11)) == gainRandomNumber) {
+                            continue;
+                        }
+                        gainRandomNumber = tmpRandom;
+                        element.setDesiredValue(settings.getDoubleSettingFor(Settings.CAMERA_GAIN) + gainRandomNumber); //We set the gain to what we want + a random number to force an update
                         specificProperty.sendChangesToDriver();
                         Thread.sleep(1000);
-                        element.setDesiredValue(settings.getDoubleSettingFor(Settings.CAMERA_GAIN)); //Here we set the gain value to what we want.
-                        specificProperty.sendChangesToDriver();
-                        Thread.sleep(1000);
+//                        element.setDesiredValue(settings.getDoubleSettingFor(Settings.CAMERA_GAIN)); //Here we set the gain value to what we want.
+//                        specificProperty.sendChangesToDriver();
+//                        Thread.sleep(1000);
                         LOGGER.debug("Now gain is  - " + element.getValue());
                         break;
                     }

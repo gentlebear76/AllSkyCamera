@@ -34,6 +34,9 @@ public class CommandLineController {
         Option exposureInterval = new Option("i", "exposureInterval", true, "Exposure interval");
         exposureInterval.setArgName("exposure interval");
 
+        Option gain = new Option("g", "gain", true, "Camera Gain");
+        exposureInterval.setArgName("gain");
+
         Options options = new Options();
         options.addOption(logLevelOption);
         options.addOption(debugLogOption);
@@ -43,6 +46,7 @@ public class CommandLineController {
         options.addOption(directoryOption);
         options.addOption(exposureTime);
         options.addOption(exposureInterval);
+        options.addOption(gain);
 
         return options;
     }

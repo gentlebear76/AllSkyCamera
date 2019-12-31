@@ -26,7 +26,6 @@ public class CameraHandler implements INDIPropertyListener {
         DEPTH_8, DEPTH_16
     }
 
-
     private static final Logger LOGGER = Logger.getLogger(CameraHandler.class);
 
     private Device device;
@@ -38,8 +37,6 @@ public class CameraHandler implements INDIPropertyListener {
 
     private int imageWidth;
     private int imageHeight;
-
-//    private long imageCounter = 1;
 
     List<INDIProperty> properties;
 
@@ -94,9 +91,6 @@ public class CameraHandler implements INDIPropertyListener {
                 throw i;
             }
         }
-
-
-
     }
 
     private void updateGain() {
@@ -123,12 +117,9 @@ public class CameraHandler implements INDIPropertyListener {
                             continue;
                         }
                         gainRandomNumber = tmpRandom;
-                        element.setDesiredValue(settings.getDoubleSettingFor(Settings.CAMERA_GAIN) + gainRandomNumber); //We set the gain to what we want + a random number to force an update
+                        element.setDesiredValue(Math.abs(settings.getDoubleSettingFor(Settings.CAMERA_GAIN)) + gainRandomNumber); //We set the gain to what we want + a random number to force an update
                         specificProperty.sendChangesToDriver();
                         Thread.sleep(1000);
-//                        element.setDesiredValue(settings.getDoubleSettingFor(Settings.CAMERA_GAIN)); //Here we set the gain value to what we want.
-//                        specificProperty.sendChangesToDriver();
-//                        Thread.sleep(1000);
                         LOGGER.debug("Now gain is  - " + element.getValue());
                         break;
                     }
@@ -154,7 +145,6 @@ public class CameraHandler implements INDIPropertyListener {
             ready = false;
             INDIBLOBValue imageValue = (INDIBLOBValue) property.getElement("CCD1").getValue();
 
-//            saveImage(imageValue);
             saveImageAsPNG(imageValue);
             try {
                 Thread.sleep(1000); //We wait a second or so to make sure the server has time to keep up.

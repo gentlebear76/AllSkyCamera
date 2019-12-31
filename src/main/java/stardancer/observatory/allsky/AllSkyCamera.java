@@ -102,6 +102,7 @@ public class AllSkyCamera {
         settings.setSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY, cmd.getOptionValue("f", settings.getStringSettingFor(Settings.CAMERA_IMAGE_DOWNLOAD_DIRECTORY)));
         settings.setSettingFor(Settings.CAMERA_EXPOSURE_TIME, cmd.getOptionValue("e", settings.getStringSettingFor(Settings.CAMERA_EXPOSURE_TIME)));
         settings.setSettingFor(Settings.CAMERA_EXPOSURE_INTERVAL, cmd.getOptionValue("i", settings.getStringSettingFor(Settings.CAMERA_EXPOSURE_INTERVAL)));
+        settings.setSettingFor(Settings.CAMERA_GAIN, cmd.getOptionValue("g", settings.getStringSettingFor(Settings.CAMERA_GAIN)));
 
         Server inputServer = new Server(settings);
         Thread serverThread = new Thread(inputServer);
